@@ -1,19 +1,14 @@
 // jvc.js v1.0
+
+// Defaults
 var	_http = superagent;
 var jvc = {};
-
 jvc.serverRoot = "";
-jvc.templateRoot = "";
+jvc.templates = [];
 jvc.isSinglePageArchEnabled = false;
-jvc.templates = {};
 
 jvc.setServerRoot = function(serverRoot) {
 	jvc.serverRoot = serverRoot;
-	return jvc;
-}
-
-jvc.setTemplateRoot = function(templateRoot) {
-	jvc.templateRoot = templateRoot;
 	return jvc;
 }
 
@@ -22,9 +17,6 @@ jvc.enableSinglePageArch = function enable() {
 }
 
 jvc.getTemplate = function getTemplate(template) {
-	if(jvc.isSinglePageArchEnabled === true) {
-		return jvc;
-	}
 	return jvc.getTemplateFromUrl(template);
 }
 
@@ -32,20 +24,42 @@ jvc.getTemplateFromPage  = function getTemplateFromPage() {
 	// todo
 }
 
-jvc.getTemplateFromUrl = function getTemplateFromUrl(templateUrl) {
+jvc.getTemplateFromUrl = function getTemplateFromUrl(templateUrl, callback) {
+	jvc.get(jvc.serverRoot + templateUrl, callback);
+}
+
+jvc.get = function(templateUrl, callback) {
 	_http.get(templateUrl).end(function(err, res){
-		// todo - bind html
+		callback(res.body);
 		return jvc;
 	});;
 }
 
-jvc.generate = function(param1, param2) {
+jvc.generate = function(root, bindings) {
 	// if param2 is not an object. its a single binding
-	// if it is...then we're binding multiple files together. and it will be for my case
-	
+	$.each(bindings, function(key, value){
+		jvc.bind(key,value);
+	});
+	return jvc;
+}
 
+jvc.bind = function bind(src, selector) {
+	jvc.getTemplateFromUrl(src,function(template){
+		$(selector).load(src);
+	})
+}
+
+jvc.saveTemplate = function saveNode(html) {
+	jvc.templates.push({
+		"homepage": html
+	});
+	return jvc;
+}
+
+jvc.render = function () {
 
 }
-// modHTML is responsible for grabbing the html
-// files together and returning a K/V store
-// to represent the file inrelation to the HTML tag
+
+jvc.router = function() {
+
+}
